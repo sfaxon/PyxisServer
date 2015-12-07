@@ -6,6 +6,12 @@
 //  Copyright © 2015 SlashAndBurn. All rights reserved.
 //
 
+#if os(Linux)
+    import Glibc
+#else
+    import Darwin
+#endif
+
 enum HTTPParserError: ErrorType {
     case Generic
     case NextLineParse
@@ -14,19 +20,24 @@ enum HTTPParserError: ErrorType {
 }
 
 class HttpParser {
-    
+
     func nextHttpRequest(socket: CInt) throws -> HttpRequest? {
+        print("starting nextHttpRequest")
         do {
             if let statusLine = try nextLine(socket) {
-                let statusTokens = statusLine.componentsSeparatedByString(" ")
+                print("status line: \(statusLine)")
+                // let statusTokens = statusLine.componentsSeparatedByString(" ")
+                let statusTokens = statusLine.characters.split{$0 == " "}.map(String.init)
 //                print("statusTokens: \(statusTokens)")
                 if ( statusTokens.count < 3 ) {
+                    print("error statusTokens.count < 3")
                     throw HTTPParserError.Generic
                 }
                 guard let method = HttpMethod(rawValue: statusTokens[0]) else {
+                    print("parser did not know http method")
                     throw HTTPParserError.InvalidRequest("Unknown Request \(statusTokens.first)")
                 }
-                
+
                 let path = statusTokens[1]
                 if let headers = try nextHeaders(socket) {
                     // TODO detect content-type and handle:
@@ -41,11 +52,12 @@ class HttpParser {
                 }
             }
         } catch {
+            print("nextLine(socket) threw an error")
             throw HTTPParserError.Generic
         }
         return nil
     }
-    
+
     private func nextBody(socket: CInt, size: Int) throws -> String? {
         var body = ""
         var counter = 0;
@@ -59,7 +71,7 @@ class HttpParser {
         }
         return body
     }
-    
+
     private func nextHeaders(socket: CInt) throws -> Dictionary<String, String>? {
         var headers = Dictionary<String, String>()
         do {
@@ -67,13 +79,16 @@ class HttpParser {
                 if ( headerLine.isEmpty ) {
                     return headers
                 }
-                let headerTokens = headerLine.componentsSeparatedByString(":")
+                // let headerTokens = headerLine.componentsSeparatedByString(":")
+
+                let headerTokens = headerLine.characters.split{$0 == ":"}.map(String.init)
+
                 if ( headerTokens.count >= 2 ) {
                     // RFC 2616 - "Hypertext Transfer Protocol -- HTTP/1.1", paragraph 4.2, "Message Headers":
                     // "Each header field consists of a name followed by a colon (":") and the field value. Field names are case-insensitive."
                     // We can keep lower case version.
                     let headerName = headerTokens[0].lowercaseString
-                    let headerValue = headerTokens[1].stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet())
+                    let headerValue = headerTokens[1] //.stringByTrimmingCharactersInSet([" ", "\n", "\t"])
                     if ( !headerName.isEmpty && !headerValue.isEmpty ) {
                         headers.updateValue(headerValue, forKey: headerName)
                     }
@@ -82,17 +97,17 @@ class HttpParser {
         } catch {
             throw HTTPParserError.NextLineParse
         }
-        
+
         return nil
     }
-    
+
     private func nextInt8(socket: CInt) -> Int {
         var buffer = [UInt8](count: 1, repeatedValue: 0);
         let next = recv(socket as Int32, &buffer, Int(buffer.count), 0)
         if next <= 0 { return next }
         return Int(buffer[0])
     }
-    
+
     private func nextLine(socket: CInt) throws -> String? {
         var characters: String = ""
         var n = 0
@@ -105,10 +120,11 @@ class HttpParser {
         }
         return characters
     }
-    
+
     func supportsKeepAlive(headers: Dictionary<String, String>) -> Bool {
         if let value = headers["connection"] {
-            return "keep-alive" == value.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet()).lowercaseString
+            // return "keep-alive" == value.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceAndNewlineCharacterSet()).lowercaseString
+            return "keep-alive" == value.lowercaseString
         }
         return false
     }

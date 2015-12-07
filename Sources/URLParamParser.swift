@@ -10,24 +10,27 @@ import Foundation
 
 public class URLParamParser: PipelineProtocol {
     private var connection: Connection
-    
+
     public required init(connection: Connection) {
         self.connection = connection
     }
-    
+
     public func call() -> Connection {
         self.connection.urlParams = extractUrlParams(connection.request.url)
         return self.connection
     }
-    
+
     private func extractUrlParams(url: String) -> [(String, String)] {
-        if let query = url.componentsSeparatedByString("?").last {
-            return query.componentsSeparatedByString("&").map { (param:String) -> (String, String) in
-                let tokens = param.componentsSeparatedByString("=")
+        let queryItems = url.characters.split{$0 == "?"}.map(String.init)
+        if queryItems.count > 1 {
+            let query = queryItems.last
+            let queryComponents = query!.characters.split{$0 == "&"}.map(String.init)
+            return queryComponents.map { (param:String) -> (String, String) in
+                let tokens = param.characters.split{$0 == "="}.map(String.init)
                 if tokens.count >= 2 {
-                    let key = tokens[0].stringByRemovingPercentEncoding
-                    let value = tokens[1].stringByRemovingPercentEncoding
-                    if key != nil && value != nil { return (key!, value!) }
+                    let key = tokens[0]
+                    let value = tokens[1]
+                    return (key, value)
                 }
                 return ("","")
             }

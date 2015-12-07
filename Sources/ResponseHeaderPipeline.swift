@@ -8,14 +8,14 @@
 
 public class ResponseHeaderPipeline: PipelineProtocol {
     var connection: Connection
-    
+
     public required init(connection: Connection) {
         self.connection = connection
     }
-    
+
     public func call() -> Connection {
         self.connection.response.headers["ResponseHeaderPipeline"] = "SomeValue"
-        self.connection.response.body = "<html><body><h1>Hello World</h1></body></html>"
+        // self.connection.response.body = "<html><body><h1>ResponseHeaderPipeline</h1></body></html>"
         return self.connection
     }
 }

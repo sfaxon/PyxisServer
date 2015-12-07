@@ -8,15 +8,15 @@
 
 class Node: Equatable, CustomStringConvertible {
     typealias Handler = Connection -> Connection
-    
+
     var children = [Node]()
     let token: Token
     var handler: Handler? = nil
-    
+
     init(token: Token) {
         self.token = token
     }
-    
+
     // adds the given child token if it doesn't exist
     // return the existing child, or the newly created node
     func addChild(node: Node) -> Node {
@@ -28,7 +28,7 @@ class Node: Equatable, CustomStringConvertible {
         }
         return node
     }
-    
+
     func matchingChild(token: Token) -> (Node?, String) {
         print("calling Node.matchingChild(\(token))")
         print("\(self.children)\n")
@@ -42,11 +42,11 @@ class Node: Equatable, CustomStringConvertible {
         print("didn't find matching child node")
         return (nil, "")
     }
-    
+
     var description: String {
         return "\(self.token) -> \(self.children.count)"
     }
-    
+
     private func indexOfTrippleEqualChild(node: Node) -> Int? {
         for (index, c) in self.children.enumerate() {
             if node.token === c.token {
