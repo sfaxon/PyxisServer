@@ -1,7 +1,7 @@
-// import XCTest
-@testable import PyxisServer
+import XCTest
+import PyxisServer
 
-class PackageTests: XCTestCase, XCTestCaseProvider {
+class PackageTests: XCTestCase {
 
     var allTests : [(String, () -> ())] {
         return [
