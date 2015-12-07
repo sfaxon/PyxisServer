@@ -41,7 +41,8 @@ class RouteTree: CustomStringConvertible {
     
     func findHandler(handler: Connection) -> (Handler)? {
         let request = handler.request
-        let requestTokens = Tokenizer.init(input: request.url)
+        let pathSplit = request.url.characters.split{$0 == "?"}.map(String.init)
+        let requestTokens = Tokenizer.init(input: pathSplit[0])
         var currentNode: Node? = self.rootNode
 //        let mutatableRequest = request
         
