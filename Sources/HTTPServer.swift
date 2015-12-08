@@ -17,7 +17,7 @@ public class HttpServer {
   var   serverSocket : Int32 = 0
   var  serverAddress : sockaddr_in?
   var     bufferSize : Int = 1024
-  var router : Router
+  var         router : Router
 
   func sockaddr_cast(p: UnsafeMutablePointer<Void>) -> UnsafeMutablePointer<sockaddr> {
     return UnsafeMutablePointer<sockaddr>(p)
@@ -82,7 +82,9 @@ public class HttpServer {
       do {
           while let request = try parser.nextHttpRequest(clientSocket) {
               print("HTTPServer processing request")
+            exit(-1)
               let keepAlive = parser.supportsKeepAlive(request.headers)
+              print("request: \(request)")
               let connection = Connection(request: request)
 
               let responseConnection = self.router.findHandler(connection)

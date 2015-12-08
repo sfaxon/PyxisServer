@@ -13,6 +13,7 @@ public class Router {
     let putTree = RouteTree()
     let postTree = RouteTree()
     let deleteTree = RouteTree()
+    let notFoundResponder = SimpleResponse.NotFound
     
     public init() {
         
@@ -48,8 +49,8 @@ public class Router {
         }
         var responseConnection = Connection(request: connection.request)
         
-        responseConnection.response = SimpleResponse.NotFound
-//        let handler: Handler = connection -> responseConnection
+        responseConnection.response = self.notFoundResponder
+
         return { (connection) in { return responseConnection }() }
     }
 

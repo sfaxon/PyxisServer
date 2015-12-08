@@ -14,7 +14,7 @@ public struct SimpleResponse: HttpResponseProtocol {
 //    case InternalServerError
 //    case RAW(Int, String)
 
-    static let NotFound: SimpleResponse = SimpleResponse(statusCode: 404, headers: [ : ], body: "<html><body><h1>404</h1></body></html>")
+    static let NotFound: SimpleResponse = SimpleResponse(statusCode: 404, headers: [ : ], body: "<html><body><h1>404</h1></body></html>\n")
 
     public var statusCode: Int
 
